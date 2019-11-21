@@ -174,16 +174,30 @@ AC_DEFUN([OVS_CHECK_LINUX], [
   AM_CONDITIONAL(LINUX_ENABLED, test -n "$KBUILD")
 ])
 
+dnl OVS_CHECK_LINUX_NETLINK
+dnl
+dnl Configure Linux netlink compat.
+AC_DEFUN([OVS_CHECK_LINUX_NETLINK], [
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([#include <linux/netlink.h>], [
+        struct nla_bitfield32 x =  { 0 };
+    ])],
+    [AC_DEFINE([HAVE_NLA_BITFIELD32], [1],
+    [Define to 1 if struct nla_bitfield32 is available.])])
+])
+
 dnl OVS_CHECK_LINUX_TC
 dnl
 dnl Configure Linux tc compat.
 AC_DEFUN([OVS_CHECK_LINUX_TC], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([#include <linux/pkt_cls.h>], [
-        int x = TCA_FLOWER_KEY_ENC_IP_TTL_MASK;
+        int x = TCA_ACT_FLAGS;
     ])],
-    [AC_DEFINE([HAVE_TCA_FLOWER_KEY_ENC_IP_TTL_MASK], [1],
-               [Define to 1 if TCA_FLOWER_KEY_ENC_IP_TTL_MASK is available.])])
+    [AC_DEFINE([HAVE_TCA_ACT_FLAGS], [1],
+               [Define to 1 if TCA_ACT_FLAGS is available.])])
+
+  AC_CHECK_MEMBERS([struct tcf_t.firstuse], [], [], [#include <linux/pkt_cls.h>])
 
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([#include <linux/tc_act/tc_vlan.h>], [
@@ -343,12 +357,24 @@ AC_DEFUN([OVS_CHECK_DPDK], [
       AC_DEFINE([VHOST_NUMA], [1], [NUMA Aware vHost support detected in DPDK.])
     ], [], [[#include <rte_config.h>]])
 
-    AC_CHECK_DECL([RTE_LIBRTE_PMD_PCAP], [
-      OVS_FIND_DEPENDENCY([pcap_dump], [pcap], [libpcap])
-      AC_CHECK_DECL([RTE_LIBRTE_PDUMP], [
-        AC_DEFINE([DPDK_PDUMP], [1], [DPDK pdump enabled in OVS.])
-      ], [], [[#include <rte_config.h>]])
-    ], [], [[#include <rte_config.h>]])
+   AC_MSG_CHECKING([whether DPDK pdump support is enabled])
+   AC_ARG_ENABLE(
+     [dpdk-pdump],
+     [AC_HELP_STRING([--enable-dpdk-pdump],
+                     [Enable DPDK pdump packet capture support])],
+     [AC_MSG_RESULT([yes])
+      AC_MSG_WARN([DPDK pdump is deprecated, consider using ovs-tcpdump instead])
+      AC_CHECK_DECL([RTE_LIBRTE_PMD_PCAP], [
+        OVS_FIND_DEPENDENCY([pcap_dump], [pcap], [libpcap])
+        AC_CHECK_DECL([RTE_LIBRTE_PDUMP], [
+          AC_DEFINE([DPDK_PDUMP], [1], [DPDK pdump enabled in OVS.])
+        ], [
+          AC_MSG_ERROR([RTE_LIBRTE_PDUMP is not defined in rte_config.h])
+        ], [[#include <rte_config.h>]])
+      ], [
+        AC_MSG_ERROR([RTE_LIBRTE_PMD_PCAP is not defined in rte_config.h])
+      ], [[#include <rte_config.h>]])],
+      [AC_MSG_RESULT([no])])
 
     AC_CHECK_DECL([RTE_LIBRTE_MLX5_PMD], [dnl found
       OVS_FIND_DEPENDENCY([mnl_attr_put], [mnl], [libmnl])
