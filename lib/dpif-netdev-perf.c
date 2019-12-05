@@ -76,7 +76,7 @@ pmd_perf_estimate_tsc_frequency(void)
             break;
         }
     }
-
+    
     memset(&s, 0, sizeof s);
     start = cycles_counter_update(&s);
     /* Using xnanosleep as it's interrupt resistant.
