@@ -56,10 +56,10 @@ matrix:
       env: OPTS="--disable-ssl"
     - arch: arm64
       compiler: gcc
-      env: KERNEL_LIST="5.0 4.20 4.19 4.18 4.17 4.16"
+      env: NPROC=20 KERNEL_LIST="5.0 4.20 4.19 4.18 4.17 4.16"
     - arch: arm64
       compiler: gcc
-      env: KERNEL_LIST="4.15 4.14 4.9 4.4 3.16"
+      env: NPROC=20 KERNEL_LIST="4.15 4.14 4.9 4.4 3.16"
     - arch: arm64
       compiler: gcc
       env: DPDK=1 OPTS="--enable-shared"
@@ -74,10 +74,10 @@ matrix:
       env: OPTS="--disable-ssl"
     - arch: arm64
       compiler: clang
-      env: KERNEL_LIST="5.0 4.20 4.19 4.18 4.17 4.16"
+      env: NPROC=20 KERNEL_LIST="5.0 4.20 4.19 4.18 4.17 4.16"
     - arch: arm64
       compiler: clang
-      env: KERNEL_LIST="4.15 4.14 4.9 4.4 3.16"
+      env: NPROC=20 KERNEL_LIST="4.15 4.14 4.9 4.4 3.16"
     - arch: arm64
       compiler: clang
       env: DPDK=1 OPTS="--enable-shared"
@@ -92,13 +92,13 @@ matrix:
       env: TESTSUITE=1 DPDK=1
     - arch: arm64
       compiler: clang
-      env: TESTSUITE=1 KERNEL=3.16
+      env: NPROC=20 TESTSUITE=1 KERNEL=3.16
     - arch: arm64
       compiler: clang
-      env: TESTSUITE=1 LIBS=-ljemalloc
+      env: NPROC=20 TESTSUITE=1 LIBS=-ljemalloc
     - arch: arm64
       compiler: clang
-      env: TESTSUITE=1 OPTS="--enable-shared"
+      env: NRPOC=20 TESTSUITE=1 OPTS="--enable-shared"
 script: ./.travis/${TRAVIS_OS_NAME}-build.sh $OPTS
 
 notifications:

@@ -7,7 +7,7 @@ CFLAGS_FOR_OVS="-g -O2"
 SPARSE_FLAGS=""
 EXTRA_OPTS="--enable-Werror"
 TARGET=""
-
+CORES=$NPROC
 function install_kernel()
 {
     if [[ "$1" =~ ^5.* ]]; then
@@ -138,7 +138,7 @@ function install_dpdk()
     sed -i '/CONFIG_RTE_LIBRTE_PMD_PCAP=n/s/=n/=y/' build/.config
     sed -i '/CONFIG_RTE_LIBRTE_PDUMP=n/s/=n/=y/' build/.config
 
-    make -j4 CC=gcc EXTRA_CFLAGS='-fPIC'
+    make -j${CORES} CC=gcc EXTRA_CFLAGS='-fPIC'
     EXTRA_OPTS="$EXTRA_OPTS --with-dpdk=$(pwd)/build"
     echo "Installed DPDK source in $(pwd)"
     popd
@@ -162,10 +162,10 @@ function build_ovs()
     # AF_XDP support.
     if [ "${KERNEL}" ] && ! [ "$AFXDP" ]; then
         pushd datapath
-        make -j4
+        make -j${CORES}
         popd
     else
-        make -j4 || { cat config.log; exit 1; }
+        make -j${CORES} || { cat config.log; exit 1; }
     fi
 }
 
@@ -214,7 +214,7 @@ if [ "$TESTSUITE" ]; then
 
     export DISTCHECK_CONFIGURE_FLAGS="$OPTS"
     if ! make distcheck CFLAGS="${CFLAGS_FOR_OVS}" \
-         TESTSUITEFLAGS=-j4 RECHECK=yes; then
+         TESTSUITEFLAGS=-j${CORES} RECHECK=yes; then
         # testsuite.log is necessary for debugging.
         cat */_build/sub/tests/testsuite.log
         exit 1
