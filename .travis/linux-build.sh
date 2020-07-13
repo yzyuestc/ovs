@@ -72,11 +72,13 @@ function install_kernel()
         # sys/cdefs.h tries to re-define it.  Older libc-dev package in xenial
         # doesn't have a fix for this issue.  Applying it manually.
         if [ "$TRAVIS_ARCH" == "aarch64" ]; then
-            sudo sed -i '/^# define __always_inline .*/i # undef __always_inline' \
+            sudo sed -i \
+                '/^# define __always_inline .*/i # undef __always_inline' \
                          /usr/include/aarch64-linux-gnu/sys/cdefs.h || true
             CFLAGS_FOR_OVS="$CFLAGS_FOR_OVS -L/usr/local/lib64"
         else
-            sudo sed -i '/^# define __always_inline .*/i # undef __always_inline' \
+            sudo sed -i \
+                '/^# define __always_inline .*/i # undef __always_inline' \
                          /usr/include/x86_64-linux-gnu/sys/cdefs.h || true
         fi
         EXTRA_OPTS="${EXTRA_OPTS} --enable-afxdp"
